@@ -1,0 +1,739 @@
+/**
+ * 问渠 - 增强动画系统
+ * 更流畅、更丰富的视觉效果
+ */
+
+/* ==================== 粒子背景 ==================== */
+.particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%);
+    opacity: 0.3;
+    animation: float-up linear infinite;
+}
+
+@keyframes float-up {
+    0% {
+        transform: translateY(100vh) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.3;
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: translateY(-100vh) scale(1) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* 祥云效果 */
+.cloud {
+    position: absolute;
+    background: radial-gradient(ellipse at center, rgba(201, 162, 39, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    filter: blur(20px);
+    animation: cloud-float linear infinite;
+}
+
+@keyframes cloud-float {
+    0% {
+        transform: translateX(-100%) translateY(0);
+    }
+    50% {
+        transform: translateX(50vw) translateY(-20px);
+    }
+    100% {
+        transform: translateX(100vw) translateY(0);
+    }
+}
+
+/* ==================== 霓虹光效 ==================== */
+.neon-glow {
+    position: relative;
+}
+
+.neon-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, var(--accent-color), var(--secondary-color), var(--accent-color));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    filter: blur(10px);
+    transition: opacity 0.3s;
+}
+
+.neon-glow:hover::before {
+    opacity: 0.6;
+    animation: neon-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes neon-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+/* ==================== 鼠标跟随光效 ==================== */
+.cursor-glow {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(201, 162, 39, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.3s;
+    mix-blend-mode: screen;
+}
+
+/* ==================== 卡片3D翻转效果 ==================== */
+.card-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-3d:hover {
+    transform: rotateY(5deg) rotateX(5deg) translateY(-10px);
+}
+
+/* ==================== 文字渐显动画 ==================== */
+.text-reveal {
+    overflow: hidden;
+}
+
+.text-reveal span {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(100%);
+    animation: text-reveal 0.6s ease forwards;
+}
+
+@keyframes text-reveal {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== 打字机光标 ==================== */
+.typewriter-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: var(--accent-color);
+    margin-left: 2px;
+    animation: cursor-blink 1s infinite;
+    vertical-align: middle;
+}
+
+@keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ==================== 震动反馈 ==================== */
+.shake {
+    animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* ==================== 脉冲光环 ==================== */
+.pulse-ring {
+    position: relative;
+}
+
+.pulse-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--accent-color);
+    border-radius: inherit;
+    opacity: 0;
+    animation: pulse-ring 2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}
+
+/* ==================== 渐变边框动画 ==================== */
+.animated-border {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.animated-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(90deg, var(--accent-color), var(--secondary-color), var(--accent-color));
+    background-size: 200% 100%;
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: border-flow 3s linear infinite;
+}
+
+@keyframes border-flow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+/* ==================== 悬浮效果增强 ==================== */
+.float-hover {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.float-hover:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 30px rgba(201, 162, 39, 0.2);
+}
+
+/* ==================== 加载动画增强 ==================== */
+.loading-enhanced {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.spinner-enhanced {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.spinner-ring {
+    position: absolute;
+    inset: 0;
+    border: 3px solid transparent;
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.spinner-ring:nth-child(2) {
+    inset: 10px;
+    border-top-color: var(--secondary-color);
+    animation: spin 1.5s linear infinite reverse;
+}
+
+.spinner-ring:nth-child(3) {
+    inset: 20px;
+    border-top-color: var(--primary-color);
+    animation: spin 2s linear infinite;
+}
+
+.loading-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.loading-dots span {
+    width: 8px;
+    height: 8px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    animation: loading-dot 1.4s ease-in-out infinite both;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+.loading-dots span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes loading-dot {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+/* ==================== 按钮涟漪效果 ==================== */
+.ripple-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-btn::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 50%;
+    left: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 60%);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+}
+
+.ripple-btn:active::after {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 1;
+    transition: transform 0.5s, opacity 0.5s;
+}
+
+/* ==================== 滚动显示动画 ==================== */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scroll-reveal-left {
+    opacity: 0;
+    transform: translateX(-50px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-left.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.scroll-reveal-right {
+    opacity: 0;
+    transform: translateX(50px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-right.revealed {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.scroll-reveal-scale {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scroll-reveal-scale.revealed {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* 视口内卡片高亮效果 */
+.card.in-viewport,
+.feature-card.in-viewport {
+    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.15);
+}
+
+/* ==================== 八字柱子动画 ==================== */
+.bazi-pillar-animated {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: pillar-appear 0.5s ease forwards;
+}
+
+.bazi-pillar-animated:nth-child(1) { animation-delay: 0.1s; }
+.bazi-pillar-animated:nth-child(2) { animation-delay: 0.2s; }
+.bazi-pillar-animated:nth-child(3) { animation-delay: 0.3s; }
+.bazi-pillar-animated:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes pillar-appear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== 发光文字 ==================== */
+.glow-text {
+    text-shadow: 
+        0 0 10px rgba(201, 162, 39, 0.5),
+        0 0 20px rgba(201, 162, 39, 0.3),
+        0 0 30px rgba(201, 162, 39, 0.2);
+    animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 10px rgba(201, 162, 39, 0.5),
+            0 0 20px rgba(201, 162, 39, 0.3),
+            0 0 30px rgba(201, 162, 39, 0.2);
+    }
+    50% {
+        text-shadow: 
+            0 0 20px rgba(201, 162, 39, 0.8),
+            0 0 40px rgba(201, 162, 39, 0.5),
+            0 0 60px rgba(201, 162, 39, 0.3);
+    }
+}
+
+/* ==================== 呼吸效果 ==================== */
+.breathe {
+    animation: breathe 3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+/* ==================== 页面切换过渡 ==================== */
+.page-transition {
+    opacity: 0;
+    animation: page-enter 0.6s ease forwards;
+}
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==================== 太极旋转 ==================== */
+.taiji-spin {
+    animation: taiji-rotate 10s linear infinite;
+}
+
+@keyframes taiji-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== 铜板弹跳 ==================== */
+.coin-bounce {
+    animation: coin-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes coin-bounce {
+    0% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.1); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+/* ==================== 进度条动画 ==================== */
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-color), var(--secondary-color));
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: progress-shimmer 1.5s infinite;
+}
+
+@keyframes progress-shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ==================== 滚动优化 ==================== */
+
+/* 平滑滚动优化 */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* 滚动时的性能优化 */
+.scroll-container {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* 减少滚动时的重绘 */
+.card, .feature-card, .result-content {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* 滚动进度指示器动画 */
+.scroll-progress {
+    animation: progress-glow 2s ease-in-out infinite;
+}
+
+@keyframes progress-glow {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.8), 0 0 25px rgba(212, 175, 55, 0.4);
+    }
+}
+
+/* 返回顶部按钮脉冲动画 */
+.back-to-top:hover {
+    animation: pulse-gold 1s ease-in-out infinite;
+}
+
+@keyframes pulse-gold {
+    0%, 100% {
+        box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    }
+    50% {
+        box-shadow: 0 8px 30px rgba(212, 175, 55, 0.6), 0 0 40px rgba(212, 175, 55, 0.3);
+    }
+}
+
+/* 触摸设备优化 */
+@media (pointer: coarse) {
+    .back-to-top {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+    
+    .scroll-progress {
+        height: 4px;
+    }
+}
+
+/* ==================== 高级滚动优化 ==================== */
+
+/* 惯性滚动优化 */
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: auto; /* 由 JS 控制平滑滚动 */
+    }
+}
+
+/* 视差滚动元素 */
+.parallax-layer {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* 滚动吸附效果 */
+.scroll-snap-container {
+    scroll-snap-type: y proximity;
+    overflow-y: scroll;
+    scroll-behavior: smooth;
+}
+
+.scroll-snap-item {
+    scroll-snap-align: start;
+    scroll-margin-top: 20px;
+}
+
+/* 滚动时的卡片效果 */
+.card, .feature-card {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.4s ease;
+    will-change: transform;
+}
+
+/* 滚动进度条增强 */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, 
+        var(--accent-color) 0%, 
+        #f0c674 50%, 
+        var(--accent-color) 100%
+    );
+    background-size: 200% 100%;
+    animation: progress-shimmer 2s linear infinite;
+    z-index: 10000;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+}
+
+@keyframes progress-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* 返回顶部按钮 */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color), rgba(212, 175, 55, 0.9));
+    border: 2px solid rgba(212, 175, 55, 0.3);
+    color: #1a1a2e;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 9999;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.back-to-top:hover {
+    transform: scale(1.15) translateY(-5px);
+    box-shadow: 0 8px 30px rgba(212, 175, 55, 0.6), 0 0 40px rgba(212, 175, 55, 0.3);
+    background: linear-gradient(135deg, #f0c674, var(--accent-color));
+}
+
+.back-to-top:active {
+    transform: scale(0.95);
+}
+
+/* 滚动时的导航栏效果 */
+.nav-scrolled {
+    background: rgba(26, 26, 46, 0.95) !important;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* 滚动指示器 - 滚动方向提示 */
+.scroll-indicator {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 50px;
+    border: 2px solid var(--accent-color);
+    border-radius: 15px;
+    opacity: 0.6;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.scroll-indicator::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    animation: scroll-bounce 2s infinite;
+}
+
+@keyframes scroll-bounce {
+    0%, 100% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(-50%) translateY(20px);
+        opacity: 0.3;
+    }
+}
+
+/* 触摸设备优化 */
+@media (pointer: coarse) {
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    .back-to-top {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .scroll-progress {
+        height: 3px;
+    }
+    
+    /* 禁用复杂的视差效果 */
+    .parallax-layer {
+        transform: none !important;
+    }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    html {
+        scroll-behavior: auto;
+    }
+}

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>六爻 - 太极贵人 | 问渠</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="enhanced-animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="page-transition">
+    <script>
+        // 新会话检测 - 刷新或重新打开网站时清除登录状态并返回主界面
+        (function() {
+            const isNewSession = !sessionStorage.getItem('wq_session_active');
+            const isFromOtherPage = document.referrer && document.referrer.includes(window.location.hostname);
+            
+            if (isNewSession) {
+                sessionStorage.setItem('wq_session_active', 'true');
+                if (!isFromOtherPage) {
+                    localStorage.removeItem('wq_user');
+                    localStorage.removeItem('wq_token');
+                    window.location.href = 'main.html';
+                    return;
+                }
+            }
+            
+            // 管理员不能使用此功能
+            const user = JSON.parse(localStorage.getItem('wq_user') || '{}');
+            if (user.role === 'admin') {
+                alert('管理员账号无法使用此功能');
+                window.location.href = 'admin.html';
+            }
+        })();
+    </script>
+    <div class="bg-decoration"></div>
+    
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1 class="logo glow-text">问渠</h1>
+            <p class="subtitle">六爻 · 太极贵人</p>
+        </header>
+
+        <!-- 导航 -->
+        <nav class="nav">
+            <a href="main.html" class="nav-btn" id="homeLink">首页</a>
+            <a href="wendao.html" class="nav-btn" id="wendaoLink">问道</a>
+            <a href="liuyao.html" class="nav-btn active" id="liuyaoLink">六爻</a>
+            <a href="heban.html" class="nav-btn" id="hebanLink">合盘</a>
+            <a href="dashboard.html" class="nav-btn" id="dataLink" style="display: none;">📊 数据</a>
+            <a href="admin.html" class="nav-btn" id="adminLink" style="display: none;">⚙️ 管理</a>
+            <a href="auth.html" class="nav-btn" id="authLink">🔑 登录</a>
+        </nav>
+
+        <!-- 登录检查提示 -->
+        <div id="loginRequired" class="card" style="border-color: rgba(255, 100, 100, 0.5); display: none;">
+            <h2 class="card-title" style="color: #ff6464;">🔒 请先登录</h2>
+            <p style="text-align: center; color: var(--text-secondary); line-height: 2;">
+                使用六爻占卜功能需要先登录账号<br>
+                登录后可以保存卦象记录，随时查看过往占卜
+            </p>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="auth.html" class="btn">🔑 立即登录</a>
+            </div>
+        </div>
+
+        <!-- 功能说明 -->
+        <div class="card float-hover" id="featureDesc">
+            <h2 class="card-title">☯ 六爻占卜</h2>
+            <p style="text-align: center; color: var(--text-secondary);">
+                太极贵人，仙风道骨的占卜专家<br>
+                三枚铜钱，六次投掷，卦象天成<br>
+                针对具体事件，给出明确吉凶指引
+            </p>
+        </div>
+
+        <!-- 占卜区域 -->
+        <div class="card float-hover" id="divinationArea">
+            <h2 class="card-title">🎲 开始占卜</h2>
+            
+            <!-- 问题输入 -->
+            <div class="form-group">
+                <label class="form-label">心中默念你想问的问题</label>
+                <textarea class="form-textarea" id="userQuestion" placeholder="请输入具体问题，如：我能拿到项目路演一等奖吗？（问题越具体，卦象越准）"></textarea>
+            </div>
+
+            <!-- 铜钱摇卦区域 -->
+            <div id="coinArea" style="text-align: center; margin: 40px 0;">
+                <div class="coin-container">
+                    <div class="coin" id="coin1">
+                        <div class="coin-face coin-front">阳</div>
+                        <div class="coin-face coin-back">阴</div>
+                    </div>
+                    <div class="coin" id="coin2">
+                        <div class="coin-face coin-front">阳</div>
+                        <div class="coin-face coin-back">阴</div>
+                    </div>
+                    <div class="coin" id="coin3">
+                        <div class="coin-face coin-front">阳</div>
+                        <div class="coin-face coin-back">阴</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <p id="tossInfo" style="color: var(--accent-color); font-size: 1.2rem; margin-bottom: 20px;">
+                        准备就绪，请点击开始摇卦
+                    </p>
+                    <button class="btn" id="tossBtn">🎲 开始摇卦</button>
+                </div>
+            </div>
+
+            <!-- 投掷进度 -->
+            <div id="progressArea" style="display: none; text-align: center; margin: 20px 0;">
+                <p style="color: var(--secondary-color);">已完成 <span id="currentToss">0</span> / 6 次投掷</p>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap;" id="tossResults">
+                    <!-- 动态生成投掷结果 -->
+                </div>
+            </div>
+
+            <!-- 卦象展示 -->
+            <div id="guaArea" style="display: none;">
+                <div class="gua-container">
+                    <div class="gua-display">
+                        <h3 class="gua-title">本卦</h3>
+                        <div id="mainGua"></div>
+                    </div>
+                    <div class="gua-display">
+                        <h3 class="gua-title">变卦</h3>
+                        <div id="changeGua"></div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- 提交按钮 -->
+            <div style="text-align: center; margin-top: 30px;" id="submitArea" style="display: none;">
+                <button class="btn" id="submitBtn">🙏 请太极贵人解卦</button>
+            </div>
+
+            <!-- 加载动画 -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">太极贵人正在解卦...</p>
+            </div>
+
+            <!-- 结果展示 -->
+            <div class="result-container" id="resultContainer">
+                <h3 class="result-title">📜 太极贵人解卦</h3>
+                <div class="result-content" id="resultContent"></div>
+                <div class="audio-controls" id="audioControls" style="display: none;">
+                    <button class="audio-btn" id="playTTSBtn">🔊 朗读结果</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 六爻说明 -->
+        <div class="card float-hover">
+            <h2 class="card-title">📖 六爻说明</h2>
+            <div class="tip-box">
+                <p><strong>少阳：</strong>两正一反，记作 ⚊，为阳爻，不变</p>
+            </div>
+            <div class="tip-box">
+                <p><strong>少阴：</strong>两反一正，记作 ⚋，为阴爻，不变</p>
+            </div>
+            <div class="tip-box">
+                <p><strong>老阳：</strong>三正，记作 ⚊，为阳爻，会变阴（动爻）</p>
+            </div>
+            <div class="tip-box">
+                <p><strong>老阴：</strong>三反，记作 ⚋，为阴爻，会变阳（动爻）</p>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>问渠 - 智能八字占卜平台</p>
+            <p>太极贵人为你占卜吉凶</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="analytics.js"></script>
+    <script src="enhanced-animations.js"></script>
+    <script src="liuyao-app.js"></script>
+    <script>
+        // 初始化数据分析
+        if (window.Analytics) {
+            // 先设置用户邮箱（在 init 之前）
+            const user = JSON.parse(localStorage.getItem('wq_user') || '{}');
+            console.log('[Liuyao] User from localStorage:', user);
+            if (user.email) {
+                console.log('[Liuyao] Setting email before init:', user.email);
+                window.__wq_user_email = user.email;
+            }
+            
+            Analytics.init();
+            
+            if (user.email) {
+                console.log('[Liuyao] Identifying user:', user.email);
+                Analytics.identify(user.email);
+            } else {
+                console.log('[Liuyao] No email found in user data');
+            }
+        }
+    </script>
+    <script>
+        // 检查登录状态
+        (function() {
+            const user = JSON.parse(localStorage.getItem('wq_user') || '{}');
+            const loginRequired = document.getElementById('loginRequired');
+            const divinationArea = document.getElementById('divinationArea');
+            const featureDesc = document.getElementById('featureDesc');
+            const authLink = document.getElementById('authLink');
+            const dataLink = document.getElementById('dataLink');
+            const adminLink = document.getElementById('adminLink');
+            const homeLink = document.getElementById('homeLink');
+            const wendaoLink = document.getElementById('wendaoLink');
+            const liuyaoLink = document.getElementById('liuyaoLink');
+            const hebanLink = document.getElementById('hebanLink');
+            
+            // 支持游客模式 - 有用户ID（包括游客）即可使用
+            if (!user.id) {
+                // 完全未登录，显示登录提示
+                loginRequired.style.display = 'block';
+                divinationArea.style.display = 'none';
+                featureDesc.style.display = 'none';
+            } else {
+                // 已登录（普通用户或游客），显示功能
+                loginRequired.style.display = 'none';
+                divinationArea.style.display = 'block';
+                featureDesc.style.display = 'block';
+                
+                // 管理员显示数据和管理按钮，并隐藏业务功能按钮
+                if (user.role === 'admin') {
+                    if (dataLink) dataLink.style.display = 'inline-block';
+                    if (adminLink) adminLink.style.display = 'inline-block';
+                    // 隐藏首页、问道、六爻、合盘按钮
+                    if (homeLink) homeLink.style.display = 'none';
+                    if (wendaoLink) wendaoLink.style.display = 'none';
+                    if (liuyaoLink) liuyaoLink.style.display = 'none';
+                    if (hebanLink) hebanLink.style.display = 'none';
+                    authLink.style.display = 'none'; // 隐藏登录/退出按钮
+                } else {
+                    // 普通用户或游客，更新导航为退出
+                    authLink.textContent = '🚪 退出';
+                    authLink.href = '#';
+                    authLink.onclick = function(e) {
+                        e.preventDefault();
+                        const isGuest = user.isGuest;
+                        const confirmMsg = isGuest ? '退出后将清除当前会话，确定要退出吗？' : '确定要退出登录吗？';
+                        if (confirm(confirmMsg)) {
+                            localStorage.removeItem('wq_user');
+                            window.location.href = 'main.html';
+                        }
+                    };
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

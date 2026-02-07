@@ -1,0 +1,162 @@
+api_logs表：
+create table public.api_logs (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  session_id text null,
+  api_endpoint text not null,
+  http_method text not null,
+  request_params jsonb null,
+  response_status integer null,
+  response_time_ms integer null,
+  error_message text null,
+  ip_address inet null,
+  user_agent text null,
+  created_at timestamp with time zone null default timezone ('utc'::text, now()),
+  constraint api_logs_pkey primary key (id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_api_logs_created_at on public.api_logs using btree (created_at desc) TABLESPACE pg_default;
+
+
+app_users表：
+create table public.app_users (
+  id uuid not null default gen_random_uuid (),
+  email text not null,
+  password_hash text not null,
+  salt text not null,
+  nickname text null,
+  role text null default 'user'::text,
+  created_at timestamp with time zone null default timezone ('utc'::text, now()),
+  updated_at timestamp with time zone null default timezone ('utc'::text, now()),
+  constraint app_users_pkey primary key (id),
+  constraint app_users_email_key unique (email),
+  constraint app_users_role_check check ((role = any (array['user'::text, 'admin'::text])))
+) TABLESPACE pg_default;
+
+create index IF not exists idx_app_users_email on public.app_users using btree (email) TABLESPACE pg_default;
+
+create index IF not exists idx_app_users_role on public.app_users using btree (role) TABLESPACE pg_default;
+
+create index IF not exists idx_app_users_created_at on public.app_users using btree (created_at desc) TABLESPACE pg_default;
+
+
+conversion_funnel表：
+create table public.conversion_funnel (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  session_id text null,
+  funnel_name text not null,
+  step_name text not null,
+  step_order integer null,
+  completed boolean null default false,
+  properties jsonb null default '{}'::jsonb,
+  created_at timestamp with time zone null default timezone ('utc'::text, now()),
+  constraint conversion_funnel_pkey primary key (id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_conversion_funnel_funnel_name on public.conversion_funnel using btree (funnel_name) TABLESPACE pg_default;
+
+
+feature_usage表：
+create table public.feature_usage (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  session_id text null,
+  feature_type text not null,
+  action text not null,
+  duration_seconds integer null,
+  input_params jsonb null,
+  result_summary text null,
+  created_at timestamp with time zone null default timezone ('utc'::text, now()),
+  constraint feature_usage_pkey primary key (id),
+  constraint feature_usage_feature_type_check check (
+    (
+      feature_type = any (
+        array[
+          'bazi'::text,
+          'liuyao'::text,
+          'heban'::text,
+          'wendao'::text,
+          'hunyin'::text,
+          'shiyun'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists idx_feature_usage_feature_type on public.feature_usage using btree (feature_type) TABLESPACE pg_default;
+
+
+page_views表：
+create table public.page_views (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  session_id text null,
+  page_path text not null,
+  page_title text null,
+  referrer text null,
+  entry_time timestamp with time zone null default timezone ('utc'::text, now()),
+  exit_time timestamp with time zone null,
+  duration_seconds integer null,
+  ip_address inet null,
+  user_agent text null,
+  device_type text null,
+  browser text null,
+  os text null,
+  country text null,
+  city text null,
+  constraint page_views_pkey primary key (id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_page_views_user_id on public.page_views using btree (user_id) TABLESPACE pg_default;
+
+create index IF not exists idx_page_views_entry_time on public.page_views using btree (entry_time desc) TABLESPACE pg_default;
+
+
+user_events表：
+create table public.user_events (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  session_id text null,
+  event_type text not null,
+  event_name text not null,
+  page_path text null,
+  properties jsonb null default '{}'::jsonb,
+  ip_address inet null,
+  user_agent text null,
+  referrer text null,
+  created_at timestamp with time zone null default timezone ('utc'::text, now()),
+  constraint user_events_pkey primary key (id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_user_events_user_id on public.user_events using btree (user_id) TABLESPACE pg_default;
+
+create index IF not exists idx_user_events_created_at on public.user_events using btree (created_at desc) TABLESPACE pg_default;
+
+
+user_sessions表：
+create table public.user_sessions (
+  id uuid not null default gen_random_uuid (),
+  session_id text not null,
+  user_id uuid null,
+  start_time timestamp with time zone null default timezone ('utc'::text, now()),
+  end_time timestamp with time zone null,
+  duration_seconds integer null,
+  page_views_count integer null default 0,
+  events_count integer null default 0,
+  ip_address inet null,
+  user_agent text null,
+  device_type text null,
+  browser text null,
+  os text null,
+  country text null,
+  city text null,
+  source text null,
+  campaign text null,
+  constraint user_sessions_pkey primary key (id),
+  constraint user_sessions_session_id_key unique (session_id)
+) TABLESPACE pg_default;
+
+create index IF not exists idx_user_sessions_session_id on public.user_sessions using btree (session_id) TABLESPACE pg_default;
+

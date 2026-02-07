@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>问渠 - 智能八字占卜平台</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="enhanced-animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="page-transition">
+    <script>
+        // 新会话检测 - 刷新或重新打开网站时清除登录状态
+        (function() {
+            const isNewSession = !sessionStorage.getItem('wq_session_active');
+            const isFromOtherPage = document.referrer && document.referrer.includes(window.location.hostname);
+            
+            if (isNewSession) {
+                sessionStorage.setItem('wq_session_active', 'true');
+                if (!isFromOtherPage) {
+                    localStorage.removeItem('wq_user');
+                    localStorage.removeItem('wq_token');
+                }
+            }
+        })();
+    </script>
+    <div class="bg-decoration"></div>
+    
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1 class="logo glow-text">问渠</h1>
+            <p class="subtitle">智能八字占卜 · 指引求职之路</p>
+        </header>
+
+        <!-- 导航 -->
+        <nav class="nav">
+            <a href="main.html" class="nav-btn active" id="homeLink">首页</a>
+            <a href="wendao.html" class="nav-btn" id="wendaoLink">问道</a>
+            <a href="liuyao.html" class="nav-btn" id="liuyaoLink">六爻</a>
+            <a href="heban.html" class="nav-btn" id="hebanLink">合盘</a>
+            <a href="dashboard.html" class="nav-btn" id="dataLink" style="display: none;">📊 数据</a>
+            <a href="admin.html" class="nav-btn" id="adminLink" style="display: none;">⚙️ 管理</a>
+            <a href="auth.html" class="nav-btn" id="authLink">🔑 登录</a>
+            <a href="#" class="nav-btn" id="logoutLink" style="display: none;">🚪 退出</a>
+        </nav>
+
+        <!-- 欢迎语 -->
+        <div class="card" id="welcomeCard">
+            <h2 class="card-title">🙏 道友安好</h2>
+            <p style="text-align: center; color: var(--text-secondary); line-height: 2;">
+                欢迎来到问渠，这里是专为应届求职生打造的智能命理分析平台。<br>
+                结合传统八字命理与现代AI技术，为你的事业、姻缘、时运提供指引。<br>
+                请选择下方功能，开启你的命理探索之旅。
+            </p>
+        </div>
+
+        <!-- 功能选择 -->
+        <div class="feature-grid" id="featureGrid">
+            <!-- 问道 -->
+            <div class="feature-card float-hover neon-glow" onclick="location.href='wendao.html'">
+                <span class="feature-icon">🎯</span>
+                <h3 class="feature-title">问道</h3>
+                <p class="feature-role">AI角色：天乙贵人</p>
+                <p class="feature-desc">
+                    基于八字分析事业、姻缘、时运<br>
+                    严肃专业的命理大师<br>
+                    为你的求职之路指点迷津
+                </p>
+            </div>
+
+            <!-- 六爻 -->
+            <div class="feature-card float-hover neon-glow" onclick="location.href='liuyao.html'">
+                <span class="feature-icon">☯</span>
+                <h3 class="feature-title">六爻</h3>
+                <p class="feature-role">AI角色：太极贵人</p>
+                <p class="feature-desc">
+                    铜钱摇卦，预测具体事件吉凶<br>
+                    仙风道骨的占卜专家<br>
+                    针对特定问题给出明确指引
+                </p>
+            </div>
+
+            <!-- 合盘 -->
+            <div class="feature-card float-hover neon-glow" onclick="location.href='heban.html'">
+                <span class="feature-icon">💕</span>
+                <h3 class="feature-title">合盘</h3>
+                <p class="feature-role">AI角色：红鸾天喜</p>
+                <p class="feature-desc">
+                    双人八字匹配度分析<br>
+                    温柔浪漫的姻缘之神<br>
+                    解析你与TA的缘分深浅
+                </p>
+            </div>
+        </div>
+
+        <!-- 使用说明 -->
+        <div class="card">
+            <h2 class="card-title">📖 使用指南</h2>
+            <div class="tip-box">
+                <p><strong>问道功能：</strong>输入你的生辰八字，选择事业、姻缘或时运方向，获得专业分析。</p>
+            </div>
+            <div class="tip-box">
+                <p><strong>六爻功能：</strong>心中默念你想问的具体问题，点击摇卦，六次投掷后生成卦象。</p>
+            </div>
+            <div class="tip-box">
+                <p><strong>合盘功能：</strong>输入两人的生辰信息，分析八字匹配度，获得相处建议。</p>
+            </div>
+        </div>
+
+        <!-- 免责声明 -->
+        <div class="card" style="border-color: rgba(255, 100, 100, 0.3);">
+            <h2 class="card-title" style="color: #ff6464;">⚠️ 温馨提示</h2>
+            <p style="text-align: center; color: var(--text-secondary); font-size: 0.9rem;">
+                本平台的八字测算仅供娱乐参考，切勿过度迷信。<br>
+                人生道路需要自己去开拓，命理分析只是提供一种思考角度。<br>
+                祝各位道友求职顺利，前程似锦！
+            </p>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>问渠 - 智能八字占卜平台</p>
+            <p>结合传统命理与现代AI技术</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="analytics.js"></script>
+    <script src="enhanced-animations.js"></script>
+    <script>
+        // 初始化数据分析
+        if (window.Analytics) {
+            // 先设置用户邮箱（在 init 之前）
+            const user = JSON.parse(localStorage.getItem('wq_user') || '{}');
+            console.log('[Main] User from localStorage:', user);
+            if (user.email) {
+                console.log('[Main] Setting email before init:', user.email);
+                // 设置全局变量让 analytics.js 在 init 时就能获取
+                window.__wq_user_email = user.email;
+            }
+            
+            // 然后初始化（会使用上面设置的 email）
+            Analytics.init();
+            
+            // 再调用 identify 确保已排队事件更新
+            if (user.email) {
+                console.log('[Main] Identifying user:', user.email);
+                Analytics.identify(user.email);
+            } else {
+                console.log('[Main] No email found in user data');
+            }
+        }
+    </script>
+    <script>
+        // 检查登录状态
+        (function() {
+            const user = JSON.parse(localStorage.getItem('wq_user') || '{}');
+            const authLink = document.getElementById('authLink');
+            const logoutLink = document.getElementById('logoutLink');
+            const dataLink = document.getElementById('dataLink');
+            const adminLink = document.getElementById('adminLink');
+            const homeLink = document.getElementById('homeLink');
+            const wendaoLink = document.getElementById('wendaoLink');
+            const liuyaoLink = document.getElementById('liuyaoLink');
+            const hebanLink = document.getElementById('hebanLink');
+            
+            if (user.id) {
+                if (user.role === 'admin') {
+                    // 管理员：显示 数据、管理、退出
+                    if (homeLink) homeLink.style.display = 'none';
+                    if (wendaoLink) wendaoLink.style.display = 'none';
+                    if (liuyaoLink) liuyaoLink.style.display = 'none';
+                    if (hebanLink) hebanLink.style.display = 'none';
+                    if (authLink) authLink.style.display = 'none';
+                    if (dataLink) dataLink.style.display = 'inline-block';
+                    if (adminLink) adminLink.style.display = 'inline-block';
+                    if (logoutLink) {
+                        logoutLink.style.display = 'inline-block';
+                        logoutLink.onclick = function(e) {
+                            e.preventDefault();
+                            if (confirm('确定要退出登录吗？')) {
+                                localStorage.removeItem('wq_user');
+                                localStorage.removeItem('wq_token');
+                                window.location.reload();
+                            }
+                        };
+                    }
+                    // 隐藏主界面内容
+                    const welcomeCard = document.getElementById('welcomeCard');
+                    const featureGrid = document.getElementById('featureGrid');
+                    if (welcomeCard) welcomeCard.style.display = 'none';
+                    if (featureGrid) featureGrid.style.display = 'none';
+                } else {
+                    // 普通用户：显示 首页、问道、六爻、合盘、退出
+                    if (authLink) authLink.style.display = 'none';
+                    if (logoutLink) {
+                        logoutLink.style.display = 'inline-block';
+                        logoutLink.onclick = function(e) {
+                            e.preventDefault();
+                            if (confirm('确定要退出登录吗？')) {
+                                localStorage.removeItem('wq_user');
+                                localStorage.removeItem('wq_token');
+                                window.location.reload();
+                            }
+                        };
+                    }
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

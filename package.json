@@ -1,0 +1,55 @@
+{
+  "name": "问渠",
+  "version": "1.0.0",
+  "description": "八字分析系统 - 整合八字计算和大模型分析，面向应届求职生的命理指导应用",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:https": "node https-server.js",
+    "dev": "nodemon server.js",
+    "dev:https": "nodemon https-server.js",
+    "test": "node bazi_calculator.js",
+    "test-qwen": "node qwen_client.js",
+    "test-langcat": "node test_langcat.js",
+    "test-tts": "node -e \"(async()=>{const {synthesizeSpeech}=require('./tts_client');const fs=require('fs');const r=await synthesizeSpeech({text:'道友好，贫道在此为你解疑。',voiceType:'qiniu_zh_male_ybxknjs',model:'tts',format:'mp3'});if(r.success){fs.writeFileSync('tts_sample.mp3',r.audioBuffer);console.log('ok: tts_sample.mp3');}else{console.error('fail:',r.error);}})()\"",
+    "setup": "node setup.js",
+    "init-admin": "node init-admin.js",
+    "health": "curl http://localhost:3000/health",
+    "health:https": "curl -k https://localhost:3443/health"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.4",
+    "express": "^4.19.2",
+    "form-data": "^4.0.4",
+    "helmet": "^7.1.0",
+    "multer": "^2.0.2",
+    "node-forge": "^1.3.1"
+  },
+  "devDependencies": {
+    "https": "^1.0.0",
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "八字",
+    "命理",
+    "AI",
+    "美团",
+    "LangCat",
+    "求职",
+    "占卜",
+    "天乙贵人"
+  ],
+  "author": "问渠开发团队",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/你的用户名/问渠.git"
+  },
+  "homepage": "https://github.com/你的用户名/问渠#readme"
+}

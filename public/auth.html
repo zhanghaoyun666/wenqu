@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 问渠</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="enhanced-animations.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        
+        .auth-tab.active {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .error-message {
+            color: #ff6464;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .success-message {
+            color: #27ae60;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .back-link a:hover {
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-decoration"></div>
+    
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1 class="logo glow-text">问渠</h1>
+            <p class="subtitle">登录 · 开启命理之旅</p>
+        </header>
+
+        <!-- 登录/注册卡片 -->
+        <div class="card auth-container">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">登录</button>
+                <button class="auth-tab" data-tab="register">注册</button>
+            </div>
+
+            <!-- 登录表单 -->
+            <form class="auth-form active" id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">邮箱</label>
+                    <input type="text" class="form-input" id="loginEmail" placeholder="请输入邮箱" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="loginPassword" placeholder="请输入密码" required>
+                </div>
+                <div class="error-message" id="loginError"></div>
+                <div class="success-message" id="loginSuccess"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn" id="loginBtn">
+                        <span>🙏 登录</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- 注册表单 -->
+            <form class="auth-form" id="registerForm">
+                <div class="form-group">
+                    <label class="form-label">邮箱</label>
+                    <input type="text" class="form-input" id="registerEmail" placeholder="请输入邮箱" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">昵称</label>
+                    <input type="text" class="form-input" id="registerNickname" placeholder="请输入昵称（可选）">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-input" id="registerPassword" placeholder="请输入密码" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" class="form-input" id="registerConfirmPassword" placeholder="请再次输入密码" required>
+                </div>
+                <div class="error-message" id="registerError"></div>
+                <div class="success-message" id="registerSuccess"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn" id="registerBtn">
+                        <span>✨ 注册</span>
+                    </button>
+                </div>
+            </form>
+
+            <div class="back-link">
+                <a href="main.html">← 返回首页</a>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>问渠 - 智能八字占卜平台</p>
+        </footer>
+    </div>
+
+    <script>
+        // 标签切换
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+                
+                document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+                document.getElementById(targetTab + 'Form').classList.add('active');
+                
+                document.querySelectorAll('.error-message, .success-message').forEach(el => {
+                    el.classList.remove('show');
+                    el.textContent = '';
+                });
+            });
+        });
+
+        // 登录表单提交
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const btn = document.getElementById('loginBtn');
+            const errorEl = document.getElementById('loginError');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span>登录中...</span>';
+            errorEl.classList.remove('show');
+            
+            try {
+                console.log('Login request:', { email: email.trim(), password: password });
+                
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email.trim(), password })
+                });
+                
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                if (!data.success) {
+                    throw new Error(data.error || '登录失败');
+                }
+                
+                // 保存登录状态
+                localStorage.setItem('wq_user', JSON.stringify(data.user));
+                localStorage.setItem('wq_token', data.token);
+                
+                // 跳转到首页或管理后台
+                if (data.user.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'main.html';
+                }
+                
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.classList.add('show');
+                btn.disabled = false;
+                btn.innerHTML = '<span>🙏 登录</span>';
+            }
+        });
+
+        // 注册表单提交
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('registerEmail').value;
+            const nickname = document.getElementById('registerNickname').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            const btn = document.getElementById('registerBtn');
+            const errorEl = document.getElementById('registerError');
+            const successEl = document.getElementById('registerSuccess');
+            
+            if (password !== confirmPassword) {
+                errorEl.textContent = '两次输入的密码不一致';
+                errorEl.classList.add('show');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span>注册中...</span>';
+            errorEl.classList.remove('show');
+            successEl.classList.remove('show');
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, nickname })
+                });
+                
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '注册失败');
+                }
+                
+                successEl.textContent = '注册成功！请登录。';
+                successEl.classList.add('show');
+                this.reset();
+                
+                // 切换到登录标签
+                setTimeout(() => {
+                    document.querySelector('[data-tab="login"]').click();
+                }, 1500);
+                
+            } catch (error) {
+                let errorMsg = error.message;
+                if (errorMsg.includes('rate limit')) {
+                    errorMsg = '注册太频繁，请等待1小时后再试';
+                } else if (errorMsg.includes('already registered')) {
+                    errorMsg = '该账号已注册，请直接登录';
+                } else if (errorMsg.includes('valid')) {
+                    errorMsg = '账号格式不正确';
+                }
+                errorEl.textContent = errorMsg;
+                errorEl.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>✨ 注册</span>';
+            }
+        });
+
+        // 检查是否已登录
+        (function() {
+            const user = JSON.parse(localStorage.getItem('wq_user') || '{}');
+            if (user.id) {
+                window.location.href = user.role === 'admin' ? 'admin.html' : 'main.html';
+            }
+        })();
+    </script>
+</body>
+</html>

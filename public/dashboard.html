@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据看板 - 问渠</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="enhanced-animations.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.05));
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .chart-container {
+            background: rgba(30, 30, 50, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-title {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table th {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        
+        .data-table tr:hover {
+            background: rgba(212, 175, 55, 0.05);
+        }
+        
+        .period-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .period-btn {
+            padding: 8px 20px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .period-btn:hover,
+        .period-btn.active {
+            background: var(--accent-color);
+            color: #1a1a2e;
+            border-color: var(--accent-color);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--text-secondary);
+        }
+        
+        .error-message {
+            text-align: center;
+            padding: 50px;
+            color: #ff6464;
+        }
+        
+        .feature-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .feature-name {
+            width: 120px;
+            color: var(--text-secondary);
+        }
+        
+        .feature-progress {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+        
+        .feature-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), #f0c674);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .feature-count {
+            width: 60px;
+            text-align: right;
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // 新会话检测 - 刷新或重新打开网站时清除登录状态并返回主界面
+        (function() {
+            const isNewSession = !sessionStorage.getItem('wq_session_active');
+            const isFromOtherPage = document.referrer && document.referrer.includes(window.location.hostname);
+            
+            console.log('[Dashboard] Session check:', { isNewSession, isFromOtherPage, referrer: document.referrer });
+            
+            if (isNewSession) {
+                sessionStorage.setItem('wq_session_active', 'true');
+                if (!isFromOtherPage) {
+                    console.log('[Dashboard] Clearing auth and redirecting to main');
+                    localStorage.removeItem('wq_user');
+                    localStorage.removeItem('wq_token');
+                    window.location.href = 'main.html';
+                    return;
+                }
+            }
+        })();
+        
+        // 检查管理员权限
+        (function() {
+            const user = JSON.parse(localStorage.getItem('wq_user') || '{}');
+            if (!user.id || user.role !== 'admin') {
+                alert('无权访问数据看板');
+                window.location.href = 'main.html';
+            }
+        })();
+    </script>
+    <div class="bg-decoration"></div>
+    
+    <div class="container dashboard-container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1 class="logo glow-text">问渠</h1>
+            <p class="subtitle">📊 数据分析看板</p>
+        </header>
+
+        <!-- 导航 -->
+        <nav class="nav" id="adminNav">
+            <a href="dashboard.html" class="nav-btn active">📊 数据</a>
+            <a href="admin.html" class="nav-btn">⚙️ 管理</a>
+            <a href="#" class="nav-btn" onclick="logout()">🚪 退出</a>
+        </nav>
+
+        <!-- 时间选择器 -->
+        <div class="period-selector">
+            <button class="period-btn active" data-days="7">近7天</button>
+            <button class="period-btn" data-days="30">近30天</button>
+            <button class="period-btn" data-days="90">近90天</button>
+        </div>
+
+        <!-- 核心指标卡片 -->
+        <div class="stats-grid" id="statsCards">
+
+            <div class="stat-card">
+                <div class="stat-label">功能使用次数</div>
+                <div class="stat-value" id="totalFeatures">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">API 调用次数</div>
+                <div class="stat-value" id="totalApiCalls">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">页面访问量</div>
+                <div class="stat-value" id="totalPageViews">-</div>
+            </div>
+        </div>
+
+        <!-- 功能使用统计 -->
+        <div class="chart-container">
+            <h3 class="chart-title">🔮 功能使用情况</h3>
+            <div id="featureStats">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- API 性能统计 -->
+        <div class="chart-container">
+            <h3 class="chart-title">⚡ API 性能</h3>
+            <div id="apiStats">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 热门页面 -->
+        <div class="chart-container">
+            <h3 class="chart-title">📄 热门页面</h3>
+            <div id="pageStats">
+                <div class="loading">加载中...</div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>问渠 - 智能八字占卜平台</p>
+        </footer>
+    </div>
+
+    <script src="analytics.js"></script>
+    <script>
+        // 检查管理员权限
+        (function() {
+            const user = JSON.parse(localStorage.getItem('wq_user') || '{}');
+            if (!user.id || user.role !== 'admin') {
+                alert('无权访问数据看板，仅限管理员');
+                window.location.href = 'main.html';
+                return;
+            }
+            
+            // 管理员已验证，无需额外操作
+        })();
+
+        let currentPeriod = 7;
+
+        // 时间选择器
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentPeriod = parseInt(this.dataset.days);
+                loadStats();
+            });
+        });
+
+        // 加载统计数据
+        async function loadStats() {
+            try {
+                const response = await fetch(`/api/analytics/stats?days=${currentPeriod}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || '加载失败');
+                }
+
+                const stats = data.stats;
+
+                // 更新核心指标
+
+                document.getElementById('totalFeatures').textContent = stats.summary.totalFeatureUsage.toLocaleString();
+                document.getElementById('totalApiCalls').textContent = stats.summary.totalApiCalls.toLocaleString();
+                document.getElementById('totalPageViews').textContent = stats.summary.totalPageViews.toLocaleString();
+
+                // 渲染功能使用统计
+                renderFeatureStats(stats.featureBreakdown);
+
+                // 渲染 API 性能统计
+                renderApiStats(stats.apiPerformance);
+
+                // 渲染页面访问统计
+                renderPageStats(stats.topPages);
+
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+                document.getElementById('statsCards').innerHTML = `
+                    <div class="error-message" style="grid-column: 1 / -1;">
+                        加载失败: ${error.message}<br>
+                        请检查网络连接或稍后重试
+                    </div>
+                `;
+            }
+        }
+
+        // 渲染功能使用统计
+        function renderFeatureStats(featureBreakdown) {
+            const container = document.getElementById('featureStats');
+            
+            if (!featureBreakdown || Object.keys(featureBreakdown).length === 0) {
+                container.innerHTML = '<div class="loading">暂无数据</div>';
+                return;
+            }
+
+            const maxCount = Math.max(...Object.values(featureBreakdown));
+            
+            const featureNames = {
+                'bazi_start': '八字-开始',
+                'bazi_complete': '八字-完成',
+                'liuyao_start': '六爻-开始',
+                'liuyao_complete': '六爻-完成',
+                'heban_start': '合盘-开始',
+                'heban_complete': '合盘-完成',
+                'wendao_start': '问道-开始',
+                'wendao_complete': '问道-完成',
+                'hunyin_start': '婚姻-开始',
+                'hunyin_complete': '婚姻-完成',
+                'shiyun_start': '时运-开始',
+                'shiyun_complete': '时运-完成'
+            };
+
+            let html = '';
+            for (const [key, count] of Object.entries(featureBreakdown).sort((a, b) => b[1] - a[1])) {
+                const percentage = (count / maxCount) * 100;
+                const name = featureNames[key] || key;
+                html += `
+                    <div class="feature-bar">
+                        <div class="feature-name">${name}</div>
+                        <div class="feature-progress">
+                            <div class="feature-progress-bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="feature-count">${count}</div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // 渲染 API 性能统计
+        function renderApiStats(apiPerformance) {
+            const container = document.getElementById('apiStats');
+            
+            if (!apiPerformance || apiPerformance.length === 0) {
+                container.innerHTML = '<div class="loading">暂无数据</div>';
+                return;
+            }
+
+            const endpointNames = {
+                '/api/ask': '八字分析',
+                '/api/ask_marriage': '婚姻分析',
+                '/api/ask_fortune': '时运分析',
+                '/api/ask_liuyao': '六爻测算',
+                '/api/ask_heban': '合盘分析',
+                '/api/calculate_bazi': '八字计算',
+                '/api/analytics/track': '数据追踪',
+                '/api/auth/login': '用户登录',
+                '/api/auth/register': '用户注册',
+                '/health': '健康检查'
+            };
+
+            let html = `
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>接口</th>
+                            <th>调用次数</th>
+                            <th>错误率</th>
+                            <th>平均响应时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            for (const api of apiPerformance.slice(0, 10)) {
+                const name = endpointNames[api.endpoint] || api.endpoint;
+                html += `
+                    <tr>
+                        <td>${name}</td>
+                        <td>${api.calls}</td>
+                        <td>${api.errorRate}</td>
+                        <td>${api.avgResponseTime}</td>
+                    </tr>
+                `;
+            }
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 渲染页面访问统计
+        function renderPageStats(topPages) {
+            const container = document.getElementById('pageStats');
+            
+            if (!topPages || topPages.length === 0) {
+                container.innerHTML = '<div class="loading">暂无数据</div>';
+                return;
+            }
+
+            const pathNames = {
+                '/': '首页',
+                '/main.html': '首页',
+                '/wendao.html': '问道',
+                '/liuyao.html': '六爻',
+                '/heban.html': '合盘',
+                '/auth.html': '登录/注册',
+                '/admin.html': '管理后台',
+                '/dashboard.html': '数据看板'
+            };
+
+            const maxViews = Math.max(...topPages.map(p => p.views));
+            
+            let html = '';
+            for (const page of topPages) {
+                const percentage = (page.views / maxViews) * 100;
+                const name = pathNames[page.path] || page.path;
+                html += `
+                    <div class="feature-bar">
+                        <div class="feature-name" style="width: 150px;">${name}</div>
+                        <div class="feature-progress">
+                            <div class="feature-progress-bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="feature-count">${page.views}</div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        // 页面加载时获取数据
+        loadStats();
+        
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('wq_user');
+                localStorage.removeItem('wq_token');
+                window.location.href = 'main.html';
+            }
+        }
+    </script>
+</body>
+</html>
